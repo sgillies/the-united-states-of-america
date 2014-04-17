@@ -75,7 +75,6 @@ ctx = {
       "@id": "http://example.com/vocab#bbox"
     },
     "coordinates": {
-      "@container": "@list",
       "@id": "http://example.com/vocab#coordinates"
     },
     "datetime": "http://www.w3.org/2006/time#inXSDDateTime",
@@ -104,6 +103,19 @@ dst_features = []
 for feature in collection['features']:
     name = feature['properties']['NAME']
     feature['when'] = {'type': 'Interval', 'start': statehood[name]}
+
+    where = feature['geometry']
+    coords = where['coordinates']
+    if where['type'] == 'Polygon':
+        for j, ring in enumerate(coords):
+            for i, point in enumerate(ring):
+                coords[j][i] = [round(v, 5) for v in point]
+    elif where['type'] == 'MultiPolygon':
+        for k, part in enumerate(coords):
+            for j, ring in enumerate(part):
+                for i, point in enumerate(ring):
+                    coords[k][j][i] = [round(v, 5) for v in point]
+
     dst_features.append(feature)
 
 collection['features'] = dst_features
